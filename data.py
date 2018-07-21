@@ -1,30 +1,3 @@
-def Articles():
-    articles = [
-        {
-            'id': 1,
-            'title': 'Article One',
-            'body': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias amet cumque dolor eaque excepturi explicabo illum in ipsam non nulla obcaecati optio, placeat quasi sint sit sunt vitae, voluptates voluptatibus.',
-            'author': 'A Millz',
-            'create_date': '04-25-2018'
-        },
-        {
-            'id': 2,
-            'title': 'Article Two',
-            'body': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias amet cumque dolor eaque excepturi explicabo illum in ipsam non nulla obcaecati optio, placeat quasi sint sit sunt vitae, voluptates voluptatibus.',
-            'author': 'B Jillz',
-            'create_date': '04-25-2018'
-        },
-        {
-            'id': 3,
-            'title': 'Article Three',
-            'body': 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias amet cumque dolor eaque excepturi explicabo illum in ipsam non nulla obcaecati optio, placeat quasi sint sit sunt vitae, voluptates voluptatibus.',
-            'author': 'C Thrillz',
-            'create_date': '04-25-2018'
-        }
-    ]
-    return articles
-
-
 def Gigs_list():
     gigs_list = [
         {
