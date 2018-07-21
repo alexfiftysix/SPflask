@@ -1,5 +1,5 @@
-def Gigs_list():
-    gigs_list = [
+def gigs_list():
+    gigs_ret = [
         {
             'id': 1,
             'title': 'Rock out with your rock',
@@ -17,4 +17,22 @@ def Gigs_list():
             'link': 'https://www.oztix.com/1248afnw4'
         }
     ]
-    return gigs_list
+    return gigs_ret
+
+
+def contact_list():
+    contacts_ret = [
+        {
+            'title': 'Instagram',
+            'value': '@streetpieces'
+        },
+        {
+            'title': 'email',
+            'value': 'streetpieces@gmail.com'
+        },
+        {
+            'title': 'Phone - Alex',
+            'value': '0402 684 288'
+        }
+    ]
+    return contacts_ret

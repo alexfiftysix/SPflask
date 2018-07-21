@@ -4,6 +4,14 @@
     box-sizing: border-box;
 }
 
+::selection {
+    background-color: black;
+}
+
+::-moz-selection {
+    background-color: black;
+}
+
 body {
     background-image: url("images/blurry_black_red.jpg");
     background-size: cover;
@@ -11,6 +19,9 @@ body {
 
     margin: 0;
     padding: 0;
+
+    color: white;
+    font-family: BebasNeue-Regular, sans-serif;
 }
 
 /* image preloading */
@@ -36,8 +47,6 @@ main {
     top: -99999999px;
     left: -99999999px;
 }
-
-
 
 img {
     width: 400px;
@@ -101,6 +110,16 @@ h1 {
     letter-spacing: 10px;
 
     transition: 250ms;
+
+}
+
+h1 a {
+    text-decoration: none;
+    cursor: default;
+}
+
+h1 a:visited {
+    color: #fff;
 }
 
 h1:hover {
@@ -140,7 +159,7 @@ h1:hover {
     src: url("fonts/BebasNeue Light.otf"), url("fonts/BebasNeue Light.ttf");
 }
 
-.gigs-wrapper {
+.gigs-wrapper, .contacts-wrapper {
     width: 768px;
     border-top: 1px solid #F5F5F5;
     border-bottom: 1px solid #F5F5F5;
@@ -182,7 +201,55 @@ h1:hover {
 }
 
 .gig-link:hover {
-    -webkit-box-shadow:  3px 3px 5px #343434;
-    -moz-box-shadow:  3px 3px 5px #343434;
-    box-shadow:  3px 3px 5px #343434;
+    -webkit-box-shadow: 3px 3px 5px #343434;
+    -moz-box-shadow: 3px 3px 5px #343434;
+    box-shadow: 3px 3px 5px #343434;
+}
+
+nav {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 15px;
+}
+
+nav a {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    font-size: 2em;
+    text-align: right;
+    font-weight: bold;
+}
+
+nav a:visited {
+    color: #f5f5f5;
+}
+
+nav a:hover {
+    text-shadow: 0 0 2px #fff;
+}
+
+.contact-detail {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.contact-detail h2 {
+    margin-bottom: 0;
+}
+
+.contact-detail h3 {
+    margin-top: 8px;
+}
+
+.contacts-wrapper {
+    display: flex;
+    justify-content: space-evenly;
+    text-align: center;
 }
