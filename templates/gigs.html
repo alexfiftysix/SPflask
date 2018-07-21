@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+
+    <div class="main-wrapper">
+        {% include 'title.html' %}
+
+        <div class="gigs-wrapper">
+            {% for gig in gigs %}
+                <div class="gig">
+                    <div class="name">
+                        <h2 class="gig-name">{{ gig.title }}</h2>
+                        <h3 class="gig-location">{{ gig.location }}</h3>
+                        <p class="gig-date">{{ gig.date }}</p>
+                    </div>
+                    <div class="tix">
+                        <p class="gig-price">{{ gig.price }}</p>
+                        <a class="gig-link" href="{{ gig.link }}">Buy tickets</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+
+        {% include 'socials.html' %}
+    </div>
+
+{% endblock %}
