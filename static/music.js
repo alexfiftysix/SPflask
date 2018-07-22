@@ -4,6 +4,7 @@ bg_images = [image_path + "blurry_black_red.jpg", image_path + "blurry_blue.jpg"
 bg_colours = ["5e5151", "544361"]; // average colour of bg image
 let current_player = 0;
 
+
 function changePlayer(direction) {
 
     document.getElementById(players[current_player]).classList.add('hide');

@@ -50,11 +50,6 @@ main {
     left: -99999999px;
 }
 
-img {
-    width: 400px;
-    height: 400px;
-}
-
 .bandcamp-player {
     width: 400px;
     height: 400px;
@@ -125,6 +120,7 @@ h1 a:visited {
 }
 
 h1:hover {
+    /* Only glow over text box, not link all the way over */
     text-shadow: 0 0 2px #fff;
     cursor: default;
 }
@@ -254,4 +250,20 @@ nav a:hover {
     display: flex;
     justify-content: space-evenly;
     text-align: center;
+}
+
+.form-group {
+    display: flex;
+    justify-content: left;
+    flex-direction: column;
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva', 'Verdana', sans-serif;
+    margin-bottom: 20px;
+}
+
+.gallery-wrapper img {
+    display: block;
+    max-width: 50vw;
+    max-height: 50vh;
+    width: auto;
+    height: auto;
 }
