@@ -14,6 +14,6 @@ Flask back end, mySQL (possibly will try Postgres for learning, or back down to 
 Front-end has been created, need to upgrade the back end to be data-driven rather than hard-coded.
 
 ## To Run ##
-$ export FLASK_APP=app.py 
-$ export FLASK_DEBUG=1  // If you want debug mode
-$ flask run
+$ export FLASK_APP=app.py <br> 
+$ export FLASK_DEBUG=1  // If you want debug mode <br>
+$ flask run <br>
