@@ -11,7 +11,9 @@ To have a simple user interface for the band to be able to upload their own musi
 Flask back end, mySQL (possibly will try Postgres for learning, or back down to MongoDB as the data has no relations)
 
 ## Current stage ##
-Front-end has been created, need to upgrade the back end to be data-driven rather than hard-coded.
+Front-end has been created for desktop. Should work fine on tablets, needs redesign for mobile.<br>
+, need to upgrade the back end to be data-driven rather than hard-coded.
+
 
 ## To Run ##
 $ export FLASK_APP=app.py <br> 
