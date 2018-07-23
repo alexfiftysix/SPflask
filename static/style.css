@@ -50,9 +50,9 @@ main {
     left: -99999999px;
 }
 
-.bandcamp-player {
-    width: 400px;
-    height: 400px;
+.bandcamp-player, #music-wrapper iframe {
+    width: 400px !important;
+    height: 400px !important;;
     border: none;
 }
 
@@ -177,6 +177,15 @@ h1:hover {
     cursor: default;
 }
 
+.old-gig {
+    color: #dfdfdf;
+}
+
+.old-gig .gig-link {
+    display: none;
+}
+
+
 .tix {
     text-align: right;
     display: flex;
@@ -222,6 +231,7 @@ nav a {
     font-size: 2em;
     text-align: right;
     font-weight: bold;
+    color: #f5f5f5;
 }
 
 nav a:visited {
