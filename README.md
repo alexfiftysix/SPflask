@@ -14,6 +14,9 @@ Flask back end, mySQL (possibly will try Postgres for learning, or back down to 
 Front-end has been created for desktop. Should work fine on tablets, needs redesign for mobile.<br>
 , need to upgrade the back end to be data-driven rather than hard-coded.
 
+## Future jobs ##
+Use some kind of magic to change the bg-colour dynamically based on the colour of the content (ie. Bandcamp iFrame, youtube player).
+
 
 ## To Run ##
 $ export FLASK_APP=app.py <br> 
