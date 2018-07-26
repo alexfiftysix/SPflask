@@ -6,7 +6,6 @@ let current_player = 0;
 
 
 function changePlayer(direction) {
-    // TODO: Player should stop when function called
     document.getElementById(players[current_player]).classList.add('hide');
     if (direction === 'r') {
         current_player++;

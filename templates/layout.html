@@ -8,6 +8,18 @@
 
 <body id="body">
 <main>
+    {% if session.logged_in %}
+        <nav class="secret_nav">
+            <a href="/deleteVideo">Delete video</a>
+            <a href="/addVideo">Add video</a>
+            <a href="/deleteMusic">Delete music</a>
+            <a href="/addMusic">Add music</a>
+            <a href="/deleteGigs">Delete gig</a>
+            <a href="/addGig">Add gig</a>
+            <a href="/addUser">Add member</a>
+            <a href="/logout">Logout</a>
+        </nav>
+    {% endif %}
 
     {% include 'includes/_messages.html' %}
     {% block body %}
@@ -25,6 +37,6 @@
 </main>
 
 
-{#<script src="/static/scripts.js" rel="script"></script>#}
+<script src="/static/scripts.js" rel="script"></script>
 </body>
 </html>

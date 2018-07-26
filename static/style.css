@@ -148,6 +148,7 @@ h1 a:hover {
     -moz-box-shadow: 0 0 8px -2px #fff;
     box-shadow: 0 0 8px -2px #fff;
     border-radius: 100%;
+    background: rgba(255, 255, 255, 0.2);
 }
 
 @font-face {
@@ -182,7 +183,6 @@ h1 a:hover {
 .old-gig .gig-link {
     display: none;
 }
-
 
 .tix {
     text-align: right;
@@ -245,6 +245,18 @@ nav a:hover {
     text-shadow: 0 0 2px #fff;
 }
 
+.secret_nav {
+    text-align: left;
+    right: auto;
+    left: 0;
+    font-size: .75em;
+}
+
+.secret_nav a {
+    justify-content: flex-start;
+    text-align: left;
+}
+
 .contact-detail {
     display: flex;
     flex-direction: column;
@@ -279,4 +291,13 @@ nav a:hover {
     max-height: 50vh;
     width: auto;
     height: auto;
+}
+
+.alert {
+    position: fixed;
+    background: #000;
+    padding: 100px 100px 30px;
+    font-size: 3em;
+    z-index: 1;
+    top: 0;
 }

@@ -4,6 +4,7 @@ from flask_mysqldb import MySQL
 from wtforms import Form, StringField, DecimalField, TextAreaField, PasswordField, DateField, validators, DateTimeField, \
     FileField
 from passlib.hash import sha256_crypt
+from functools import wraps
 import datetime
 
 app = Flask(__name__)
@@ -22,8 +23,22 @@ gig_list = gigs_list()
 contacts = contact_list()
 
 
-# TODO: Remove music/gigs/video routes
-# TODO: Give instructions on how to get iframe from Bandcamp/Youtube
+# TODO: Work out authentication
+# TODO: Work out file upload (For bg photos for music)
+# TODO: Give instructions to users on how to get iframe from Bandcamp/Youtube
+# TODO: Generalize delete routes, video+music routes
+
+# check if user logged in
+def is_logged_in(f):
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if 'logged_in' in session:
+            return f(*args, **kwargs)
+        else:
+            return redirect('/')
+
+    return wrap
+
 
 @app.route('/')
 @app.route('/music')
@@ -32,7 +47,42 @@ def music():
     cur.execute('SELECT * FROM music')
     data = cur.fetchall()
     return render_template('music_db.html', music_players=data)
-    mysql.connection.close()
+
+
+@app.route('/deleteMusic/<music_id>')
+@is_logged_in
+def delete_music(music_id):
+    cur = mysql.connection.cursor()
+    cur.execute('DELETE FROM music WHERE id = %s', music_id)
+    mysql.connection.commit()
+    return redirect('/music')
+
+
+@app.route('/deleteMusic')
+@is_logged_in
+def delete_mus():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM music')
+    data = cur.fetchall()
+    return render_template('deleteMusic.html', music=data)
+
+
+@app.route('/deleteVideo')
+@is_logged_in
+def delete_vid():
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM videos')
+    data = cur.fetchall()
+    return render_template('deleteVideo.html', videos=data)
+
+
+@app.route('/deleteVideo/<vid_id>')
+@is_logged_in
+def delete_video(vid_id):
+    cur = mysql.connection.cursor()
+    cur.execute('DELETE FROM videos WHERE id = %s', vid_id)
+    mysql.connection.commit()
+    return redirect('/video')
 
 
 @app.route('/video')
@@ -50,7 +100,8 @@ class NewVideoForm(Form):
 
 
 @app.route('/addVideo', methods=['GET', 'POST'])
-def addVideo():
+@is_logged_in
+def add_video():
     form = NewVideoForm(request.form)
     if request.method == 'POST' and form.validate():
         name = form.name.data
@@ -77,6 +128,24 @@ def addVideo():
 def gigs():
     cur = mysql.connection.cursor()
 
+    future_gigs = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE()')
+    future_gigs_data = sorted(cur.fetchall(), key=lambda k: k['date'])
+
+    past_gigs = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE() - INTERVAL 1 WEEK AND DATE < CURDATE()')
+    past_gigs_data = sorted(cur.fetchall(), key=lambda k: k['date'])
+
+    gigs_num = future_gigs + past_gigs
+
+    return render_template('gigs.html', gigs=future_gigs_data, old_gigs=past_gigs_data, gigs_num=gigs_num)
+    # TODO: Work out what to do if no gigs
+    # Close connection
+
+
+@app.route('/deleteGigs')
+@is_logged_in
+def delete_gigs():
+    cur = mysql.connection.cursor()
+
     result = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE() - INTERVAL 1 WEEK')
 
     future_gigs = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE()')
@@ -85,10 +154,16 @@ def gigs():
     past_gigs = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE() - INTERVAL 1 WEEK AND DATE < CURDATE()')
     past_gigs_data = sorted(cur.fetchall(), key=lambda k: k['date'])
 
-    if result > 0:
-        return render_template('gigs.html', gigs=future_gigs_data, old_gigs=past_gigs_data)
-    # Close connection
-    mysql.connection.close()
+    return render_template('deleteGigs.html', gigs=future_gigs_data, old_gigs=past_gigs_data)
+
+
+@app.route('/deleteGig/<gig_id>')
+@is_logged_in
+def delete_gig(gig_id):
+    cur = mysql.connection.cursor()
+    cur.execute('DELETE FROM gigs WHERE id = %s', gig_id)
+    mysql.connection.commit()
+    return redirect('/gigs')
 
 
 class NewMusicForm(Form):
@@ -98,6 +173,7 @@ class NewMusicForm(Form):
 
 
 @app.route('/addMusic', methods=['GET', 'POST'])
+@is_logged_in
 def addMusic():
     form = NewMusicForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -128,6 +204,7 @@ def contact():
 
 
 @app.route('/photos')
+@is_logged_in
 def photos():
     return render_template('photos.html')
 
@@ -147,6 +224,7 @@ class NewGigForm(Form):
 
 
 @app.route('/addGig', methods=['GET', 'POST'])
+@is_logged_in
 def add_gig():
     form = NewGigForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -184,6 +262,7 @@ class NewUserForm(Form):
 
 
 @app.route('/addUser', methods=['GET', 'POST'])
+@is_logged_in
 def add_user():
     form = NewUserForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -204,8 +283,58 @@ def add_user():
 
         flash('You are now registered and can log in', 'success')
 
-        return redirect(url_for('music.html'))
+        return redirect(url_for('/music'))
     return render_template('addUser.html', form=form)
+
+
+# User login
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        # Get form fields
+        # not using wtForms
+        username = request.form['username']
+        password_candidate = request.form['password']
+
+        cur = mysql.connection.cursor()
+        result = cur.execute('SELECT * FROM users WHERE username = %s', [username])
+
+        if result > 0:
+            # Get stored hash
+            data = cur.fetchone()
+            password = data['password']
+
+            # Compare passwords
+            if sha256_crypt.verify(password_candidate, password):
+                # Passed
+
+                session['logged_in'] = True
+                session['username'] = username
+
+                return redirect('/')
+            else:
+                app.logger.info('PASSWORD INCORRECT')
+                error = 'Username or password incorrect'
+                return render_template('login.html', error=error)
+
+        else:
+            error = 'Username or password incorrect'
+            app.logger.info('NO USER')
+            return render_template('login.html', error=error)
+
+    return render_template('login.html')
+
+
+@app.route('/logout')
+@is_logged_in
+def logout():
+    session.clear()
+    return redirect('/')
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect('/')
 
 
 if __name__ == '__main__':

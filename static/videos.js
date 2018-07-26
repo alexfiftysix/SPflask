@@ -1,5 +1,3 @@
-//TODO: this
-
 videos = get_videos();
 hide_all_but_first('video-wrapper');
 let current_video = 0;
