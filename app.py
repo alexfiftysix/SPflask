@@ -1,8 +1,13 @@
+import os
+
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
 from data import gigs_list, contact_list
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, DecimalField, TextAreaField, PasswordField, DateField, validators, DateTimeField, \
-    FileField
+from wtforms import Form, StringField, DecimalField, TextAreaField, PasswordField, validators, DateTimeField
+from wtforms.fields.html5 import DateField
+from flask_wtf.file import FileRequired, FileField
+from flask_wtf import FlaskForm
+from werkzeug.utils import secure_filename
 from passlib.hash import sha256_crypt
 from functools import wraps
 import datetime
@@ -23,7 +28,6 @@ gig_list = gigs_list()
 contacts = contact_list()
 
 
-# TODO: Work out authentication
 # TODO: Work out file upload (For bg photos for music)
 # TODO: Give instructions to users on how to get iframe from Bandcamp/Youtube
 # TODO: Generalize delete routes, video+music routes
@@ -96,7 +100,7 @@ def video():
 
 class NewVideoForm(Form):
     name = StringField('Title', [validators.data_required(), validators.Length(min=1, max=100)])
-    url = StringField('url', [validators.data_required(), validators.Length(min=1, max=500)])
+    url = StringField('iframe', [validators.data_required(), validators.Length(min=1, max=500)])
 
 
 @app.route('/addVideo', methods=['GET', 'POST'])
@@ -111,8 +115,7 @@ def add_video():
         cur = mysql.connection.cursor()
 
         # Insert new user
-        cur.execute('INSERT INTO videos(name, url) VALUES(%s, %s)',
-                    (name, url))
+        cur.execute('INSERT INTO videos(name, url) VALUES(%s, %s)', (name, url))
 
         # Commit to DB
         mysql.connection.commit()
@@ -160,8 +163,9 @@ def delete_gigs():
 @app.route('/deleteGig/<gig_id>')
 @is_logged_in
 def delete_gig(gig_id):
+    print(gig_id)
     cur = mysql.connection.cursor()
-    cur.execute('DELETE FROM gigs WHERE id = %s', gig_id)
+    cur.execute("DELETE FROM gigs WHERE id = %s", [gig_id])
     mysql.connection.commit()
     return redirect('/gigs')
 
@@ -209,18 +213,36 @@ def photos():
     return render_template('photos.html')
 
 
-class NewPhotoForm(Form):
-    title = StringField('Title', [validators.data_required(), validators.Length(min=1, max=250)])
-    photo = FileField('Photo', [validators.data_required()])
-    gallery = StringField('Gallery')
+class NewPhotoForm(FlaskForm):
+    path = FileField('Photo', validators=[FileRequired()])
+
+
+@app.route('/addPhoto', methods=['GET', 'POST'])
+@is_logged_in
+def add_photo():
+    form = NewPhotoForm(request.form)
+    if request.method == 'POST' and form.validate_on_submit():
+        f = form.path.data
+        filename = secure_filename(f.filename)
+        f.save(os.path.join(
+            app.instance_path, 'static/images/gallery', filename
+        ))
+
+        cur = mysql.connection.cursor()
+        cur.execute('INSERT INTO photos(path) VALUES(%s)', filename)
+        mysql.connection.commit()
+        mysql.connection.close()
+
+        return redirect('photos.html')
+    return render_template('addPhoto.html', form=form)
 
 
 class NewGigForm(Form):
     title = StringField('Title', [validators.data_required(), validators.Length(min=1, max=250)])
     location = StringField('Location', [validators.data_required(), validators.Length(min=1, max=250)])
-    date = DateTimeField('Date', [validators.data_required()])
+    date = DateField('Date', [validators.data_required()])
     price = DecimalField('Price', [validators.data_required()])
-    link = StringField('Link', [validators.data_required(), validators.Length(min=0, max=250)])
+    link = StringField('Link', [validators.Length(min=0, max=250)])
 
 
 @app.route('/addGig', methods=['GET', 'POST'])
@@ -239,7 +261,7 @@ def add_gig():
 
         # Insert new user
         cur.execute('INSERT INTO gigs(title, location, date, price, link) VALUES(%s, %s, %s, %s, %s)',
-                    (title, location, date, price, link))
+                    [title, location, date, price, link])
 
         # Commit to DB
         mysql.connection.commit()

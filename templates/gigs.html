@@ -10,7 +10,7 @@
                     <div class="name">
                         <h2 class="gig-name">{{ gig.title }}</h2>
                         <h3 class="gig-location">{{ gig.location }}</h3>
-                        <p class="gig-date">{{ gig.date }}</p>
+                        <p class="gig-date">{{ gig.date.date() }}</p>
                     </div>
                     <div class="tix">
                         <p class="gig-price">{{ gig.price }}</p>
@@ -24,11 +24,13 @@
                     <div class="name">
                         <h2 class="gig-name">{{ gig.title }}</h2>
                         <h3 class="gig-location">{{ gig.location }}</h3>
-                        <p class="gig-date">{{ gig.date }}</p>
+                        <p class="gig-date">{{ gig.date.date() }}</p>
                     </div>
                     <div class="tix">
                         <p class="gig-price">{{ gig.price }}</p>
+                        {% if gig.link %}
                         <a class="gig-link" href="{{ gig.link }}">Buy tickets</a>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
