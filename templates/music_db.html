@@ -5,13 +5,13 @@
         <img class="left-arrow arrow" src="../static/images/right_arrow.png">
     </div>
     <div class="main-wrapper">
+
         {% include 'title.html' %}
         <div id="music-wrapper">
             {% for player in music_players %}
                 {{ player.iframe | safe }}
             {% endfor %}
         </div>
-
         {% include 'socials.html' %}
 
     </div>

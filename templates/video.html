@@ -2,12 +2,27 @@
 
 {% block body %}
 
+    {% if size > 1 %}
+        <div class="arrow-box" onclick="changePlayer('l')">
+            <img class="left-arrow arrow" src="../static/images/right_arrow.png">
+        </div>
+    {% endif %}
+
     <div class="main-wrapper">
-    {% include 'title.html' %}
-
-    <iframe id="monster-vid" class="video" width="560" height="315" src="https://www.youtube.com/embed/uL-RIv0HP3s?rel=0&amp;showinfo=0"
-            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
-
-    {% include 'socials.html' %}
+        {% include 'title.html' %}
+        <div id="video-wrapper">
+            {% for video in videos %}
+                {{ video.url | safe }}
+            {% endfor %}
+        </div>
+        {% include 'socials.html' %}
     </div>
+
+    {% if size > 1 %}
+        <div class="arrow-box" onclick="changePlayer('r')">
+            <img class="right-arrow arrow" src="../static/images/right_arrow.png">
+        </div>
+    {% endif %}
+
+    <script src="/static/videos.js" rel="script"></script>
 {% endblock %}

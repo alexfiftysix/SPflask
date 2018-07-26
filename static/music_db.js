@@ -1,4 +1,4 @@
-players = ["eyew", "other-side"];
+//TODO: Get BG images in
 image_path = "static/images/";
 bg_images = [image_path + "blurry_black_red.jpg", image_path + "blurry_blue.jpg"];
 bg_colours = ["5e5151", "544361"]; // average colour of bg image
@@ -16,9 +16,13 @@ function get_players() {
 }
 
 function changePlayer(direction) {
+    //stop music playing
+    let src = bandcamp_players[current_player].getAttribute('src');
+    bandcamp_players[current_player].removeAttribute("src");
+    bandcamp_players[current_player].setAttribute("src", src);
+
     //hide current player
     bandcamp_players[current_player].classList.add('hide');
-    //TODO: stop music playing from current player
 
     //find next player
     if (direction === 'r') {
@@ -35,29 +39,11 @@ function changePlayer(direction) {
     bandcamp_players[current_player].classList.remove('hide');
 }
 
-
-// function changePlayer(direction) {
-//     TODO: Player should stop when function called
-// document.getElementById(players[current_player]).classList.add('hide');
-// if (direction === 'r') {
-//     current_player++;
-// } else if (direction === 'l') {
-//     current_player--;
-//     if (current_player < 0) {
-//         current_player = players.length - 1;
-//     }
-// }
-// current_player %= players.length;
-// document.getElementById('body').style.backgroundImage = 'url(' + bg_images[current_player] + ')';
-// document.getElementById('body').style.backgroundColor = '#' + bg_colours[current_player];
-// document.getElementById(players[current_player]).classList.remove('hide');
-// console.log(current_player)
-// }
-
 /**
  * Hide all iframes except the first one
  */
 function hide_all_but_first(parent) {
+    //TODO: connect this and identical in videos.js
     let musicWrap = document.getElementById(parent);
     let children = musicWrap.children;
 

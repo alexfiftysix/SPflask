@@ -1,7 +1,8 @@
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
 from data import gigs_list, contact_list
 from flask_mysqldb import MySQL
-from wtforms import Form, StringField, DecimalField, TextAreaField, PasswordField, DateField, validators, DateTimeField
+from wtforms import Form, StringField, DecimalField, TextAreaField, PasswordField, DateField, validators, DateTimeField, \
+    FileField
 from passlib.hash import sha256_crypt
 import datetime
 
@@ -21,15 +22,55 @@ gig_list = gigs_list()
 contacts = contact_list()
 
 
+# TODO: Remove music/gigs/video routes
+# TODO: Give instructions on how to get iframe from Bandcamp/Youtube
+
 @app.route('/')
 @app.route('/music')
 def music():
-    return render_template('music.html')
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM music')
+    data = cur.fetchall()
+    return render_template('music_db.html', music_players=data)
+    mysql.connection.close()
 
 
 @app.route('/video')
 def video():
-    return render_template('video.html')
+    cur = mysql.connection.cursor()
+
+    result = cur.execute('SELECT * FROM videos')
+    data = cur.fetchall()
+    return render_template('video.html', videos=data, size=result)
+
+
+class NewVideoForm(Form):
+    name = StringField('Title', [validators.data_required(), validators.Length(min=1, max=100)])
+    url = StringField('url', [validators.data_required(), validators.Length(min=1, max=500)])
+
+
+@app.route('/addVideo', methods=['GET', 'POST'])
+def addVideo():
+    form = NewVideoForm(request.form)
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        url = form.url.data
+
+        # Create Cursor
+        cur = mysql.connection.cursor()
+
+        # Insert new user
+        cur.execute('INSERT INTO videos(name, url) VALUES(%s, %s)',
+                    (name, url))
+
+        # Commit to DB
+        mysql.connection.commit()
+
+        # Close connection
+        mysql.connection.close()
+
+        return redirect('/video')
+    return render_template('addVideo.html', form=form)
 
 
 @app.route('/gigs')
@@ -50,13 +91,35 @@ def gigs():
     mysql.connection.close()
 
 
-@app.route('/music_db')
-def music_db():
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM music')
-    data = cur.fetchall()
-    return render_template('music_db.html', music_players=data)
-    mysql.connection.close()
+class NewMusicForm(Form):
+    name = StringField('Title', [validators.data_required(), validators.Length(min=1, max=250)])
+    iframe = StringField('iframe', [validators.data_required(), validators.Length(min=1, max=500)])
+    image = StringField('Image', [validators.data_required(), validators.Length(min=1, max=500)])
+
+
+@app.route('/addMusic', methods=['GET', 'POST'])
+def addMusic():
+    form = NewMusicForm(request.form)
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        iframe = form.iframe.data
+        image = form.image.data
+
+        # Create Cursor
+        cur = mysql.connection.cursor()
+
+        # Insert new user
+        cur.execute('INSERT INTO music(name, iframe, image) VALUES(%s, %s, %s)',
+                    (name, iframe, image))
+
+        # Commit to DB
+        mysql.connection.commit()
+
+        # Close connection
+        mysql.connection.close()
+
+        return redirect('/music')
+    return render_template('addMusic.html', form=form)
 
 
 @app.route('/contact')
@@ -67,6 +130,12 @@ def contact():
 @app.route('/photos')
 def photos():
     return render_template('photos.html')
+
+
+class NewPhotoForm(Form):
+    title = StringField('Title', [validators.data_required(), validators.Length(min=1, max=250)])
+    photo = FileField('Photo', [validators.data_required()])
+    gallery = StringField('Gallery')
 
 
 class NewGigForm(Form):
@@ -100,7 +169,7 @@ def add_gig():
         # Close connection
         mysql.connection.close()
 
-        return redirect('/music')
+        return redirect('/gigs')
         return render_template('addGig.html', form=form)  # todo: replace this
     return render_template('addGig.html', form=form)
 
