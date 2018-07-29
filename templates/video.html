@@ -1,30 +1,13 @@
-{% extends 'layout.html' %}
+{% extends 'gallery.html' %}
 
 {# TODO: Darken rest of screen when video playing #}
+{% block gallery %}
 
-{% block body %}
-
-    {% if size > 1 %}
-        <div class="arrow-box" onclick="changePlayer('l')">
-            <img class="left-arrow arrow" src="../static/images/right_arrow.png">
-        </div>
-    {% endif %}
-
-    <div class="main-wrapper">
-        {% include 'title.html' %}
-        <div id="video-wrapper">
-            {% for video in videos %}
-                {{ video.url | safe }}
-            {% endfor %}
-        </div>
-        {% include 'socials.html' %}
+    <div id="video-wrapper">
+        {% for video in videos %}
+            {{ video.url | safe }}
+        {% endfor %}
     </div>
-
-    {% if size > 1 %}
-        <div class="arrow-box" onclick="changePlayer('r')">
-            <img class="right-arrow arrow" src="../static/images/right_arrow.png">
-        </div>
-    {% endif %}
 
     <script src="/static/videos.js" rel="script"></script>
 {% endblock %}

@@ -33,7 +33,7 @@ function changePlayer(direction) {
 
 
 function hide_all_but_first(parent) {
-    //TODO: connect this and identical in music_db.js
+    //TODO: connect this and identical in music.js
     let musicWrap = document.getElementById(parent);
     let children = musicWrap.children;
 

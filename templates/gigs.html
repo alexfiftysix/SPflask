@@ -13,7 +13,7 @@
                         <p class="gig-date">{{ gig.date.date() }}</p>
                     </div>
                     <div class="tix">
-                        <p class="gig-price">{{ gig.price }}</p>
+                        <p class="gig-price">${{ gig.price }}</p>
                         <a class="gig-link" href="{{ gig.link }}">Buy tickets</a>
                     </div>
                 </div>
@@ -27,7 +27,7 @@
                         <p class="gig-date">{{ gig.date.date() }}</p>
                     </div>
                     <div class="tix">
-                        <p class="gig-price">{{ gig.price }}</p>
+                        <p class="gig-price">${{ gig.price }}</p>
                         {% if gig.link %}
                         <a class="gig-link" href="{{ gig.link }}">Buy tickets</a>
                         {% endif %}

@@ -1,13 +1,15 @@
 import os
-
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
 from data import gigs_list, contact_list
 from flask_mysqldb import MySQL
 from wtforms import Form, StringField, DecimalField, TextAreaField, PasswordField, validators, DateTimeField
 from wtforms.fields.html5 import DateField
-from flask_wtf.file import FileRequired, FileField
+
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired
 from werkzeug.utils import secure_filename
+import flask_wtf
+
 from passlib.hash import sha256_crypt
 from functools import wraps
 import datetime
@@ -29,8 +31,8 @@ contacts = contact_list()
 
 
 # TODO: Work out file upload (For bg photos for music)
-# TODO: Give instructions to users on how to get iframe from Bandcamp/Youtube
 # TODO: Generalize delete routes, video+music routes
+# TODO: Make sessions expire after 1 hour or so
 
 # check if user logged in
 def is_logged_in(f):
@@ -48,9 +50,9 @@ def is_logged_in(f):
 @app.route('/music')
 def music():
     cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM music')
+    size = cur.execute('SELECT * FROM music')
     data = cur.fetchall()
-    return render_template('music_db.html', music_players=data)
+    return render_template('music.html', music_players=data, size=size)
 
 
 @app.route('/deleteMusic/<music_id>')
@@ -71,6 +73,52 @@ def delete_mus():
     return render_template('deleteMusic.html', music=data)
 
 
+class NewMusicForm(FlaskForm):
+    name = StringField('Title', [validators.data_required(), validators.Length(min=1, max=250)])
+    iframe = StringField('iframe', [validators.data_required(), validators.Length(min=1, max=500)])
+    image = FileField()
+
+
+# TODO: Make this file upload shit work
+@app.route('/addMusic', methods=['GET', 'POST'])
+@is_logged_in
+def addMusic():
+    form = NewMusicForm(request.form)
+    if request.method == 'POST' and form.validate_on_submit():
+        name = form.name.data
+        iframe = form.iframe.data
+        image = form.image.data
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(
+            app.instance_path, 'photos', filename
+        ))
+
+        # Create Cursor
+        cur = mysql.connection.cursor()
+
+        # Insert new user
+        cur.execute('INSERT INTO music(name, iframe, image) VALUES(%s, %s, %s)',
+                    (name, iframe, image))
+
+        # Commit to DB
+        mysql.connection.commit()
+
+        # Close connection
+        mysql.connection.close()
+
+        return redirect('/')
+    return render_template('addMusic.html', form=form)
+
+
+@app.route('/video')
+def video():
+    cur = mysql.connection.cursor()
+
+    size = cur.execute('SELECT * FROM videos')
+    videos = cur.fetchall()
+    return render_template('video.html', videos=videos, size=size)
+
+
 @app.route('/deleteVideo')
 @is_logged_in
 def delete_vid():
@@ -87,15 +135,6 @@ def delete_video(vid_id):
     cur.execute('DELETE FROM videos WHERE id = %s', vid_id)
     mysql.connection.commit()
     return redirect('/video')
-
-
-@app.route('/video')
-def video():
-    cur = mysql.connection.cursor()
-
-    result = cur.execute('SELECT * FROM videos')
-    data = cur.fetchall()
-    return render_template('video.html', videos=data, size=result)
 
 
 class NewVideoForm(Form):
@@ -168,38 +207,6 @@ def delete_gig(gig_id):
     cur.execute("DELETE FROM gigs WHERE id = %s", [gig_id])
     mysql.connection.commit()
     return redirect('/gigs')
-
-
-class NewMusicForm(Form):
-    name = StringField('Title', [validators.data_required(), validators.Length(min=1, max=250)])
-    iframe = StringField('iframe', [validators.data_required(), validators.Length(min=1, max=500)])
-    image = StringField('Image', [validators.data_required(), validators.Length(min=1, max=500)])
-
-
-@app.route('/addMusic', methods=['GET', 'POST'])
-@is_logged_in
-def addMusic():
-    form = NewMusicForm(request.form)
-    if request.method == 'POST' and form.validate():
-        name = form.name.data
-        iframe = form.iframe.data
-        image = form.image.data
-
-        # Create Cursor
-        cur = mysql.connection.cursor()
-
-        # Insert new user
-        cur.execute('INSERT INTO music(name, iframe, image) VALUES(%s, %s, %s)',
-                    (name, iframe, image))
-
-        # Commit to DB
-        mysql.connection.commit()
-
-        # Close connection
-        mysql.connection.close()
-
-        return redirect('/music')
-    return render_template('addMusic.html', form=form)
 
 
 @app.route('/contact')
