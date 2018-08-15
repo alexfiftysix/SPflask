@@ -15,7 +15,9 @@ Front-end has been created for desktop. Should work fine on tablets, needs redes
 , need to upgrade the back end to be data-driven rather than hard-coded.
 
 ## Future jobs ##
-Use some kind of magic to change the bg-colour dynamically based on the colour of the content (ie. Bandcamp iFrame, youtube player).
+Use some kind of magic to change the bg-colour dynamically based on the colour of the content (ie. Bandcamp iFrame, youtube player)
+
+Change over to PostgreSQL instead of mySQL for kicks
 
 
 ## To Run ##
