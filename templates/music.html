@@ -4,7 +4,7 @@
 
     <div id="music-wrapper">
         {% for player in music_players %}
-            {{ player.iframe | safe }}
+            {{ player[1] | safe }}
         {% endfor %}
     </div>
 

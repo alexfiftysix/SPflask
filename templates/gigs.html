@@ -4,32 +4,36 @@
     <div class="main-wrapper">
         {% include 'title.html' %}
 
+
         <div class="gigs-wrapper">
+            {#
             {% for gig in old_gigs %}
                 <div class="gig old-gig">
                     <div class="name">
-                        <h2 class="gig-name">{{ gig.title }}</h2>
-                        <h3 class="gig-location">{{ gig.location }}</h3>
-                        <p class="gig-date">{{ gig.date.date() }}</p>
+                        <h2 class="gig-name">{{ gig[1] }}</h2>
+                        <h3 class="gig-location">{{ gig[2]}}</h3>
+                        <p class="gig-date">{{ gig[3].date() }}</p>
                     </div>
                     <div class="tix">
-                        <p class="gig-price">${{ gig.price }}</p>
-                        <a class="gig-link" href="{{ gig.link }}">Buy tickets</a>
+                        <p class="gig-price">${{ gig[4]}}</p>
+                        <a class="gig-link" href="{{ gig[5]}}">Buy tickets</a>
                     </div>
                 </div>
             {% endfor %}
+         #}
+
 
             {% for gig in gigs %}
                 <div class="gig">
                     <div class="name">
-                        <h2 class="gig-name">{{ gig.title }}</h2>
-                        <h3 class="gig-location">{{ gig.location }}</h3>
-                        <p class="gig-date">{{ gig.date.date() }}</p>
+                        <h2 class="gig-name">{{ gig[1] }}</h2>
+                        <h3 class="gig-location">{{ gig[2] }}</h3>
+                        <p class="gig-date">{{ gig[3] }}</p>
                     </div>
                     <div class="tix">
-                        <p class="gig-price">${{ gig.price }}</p>
-                        {% if gig.link %}
-                        <a class="gig-link" href="{{ gig.link }}">Buy tickets</a>
+                        <p class="gig-price">${{ gig[4] }}</p>
+                        {% if gig[5] %}
+                            <a class="gig-link" href="{{ gig[5] }}">Buy tickets</a>
                         {% endif %}
                     </div>
                 </div>

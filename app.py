@@ -1,4 +1,7 @@
 import os
+import sqlite3
+
+import flask
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
 from data import gigs_list, contact_list
 from flask_mysqldb import MySQL
@@ -17,22 +20,24 @@ import datetime
 app = Flask(__name__)
 app.secret_key = 'secret123'
 
-# Config mySQL
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_password'] = ''
-app.config['MYSQL_DB'] = 'StreetPiecesClean'
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'  # return from DB as dictionary
-# Init mySQL
-mysql = MySQL(app)
+DATABASE = 'db/SPflask.db'
 
 gig_list = gigs_list()
 contacts = contact_list()
 
 
+# TODO: Change from mySQL to SQLite3
 # TODO: Work out file upload (For bg photos for music)
 # TODO: Generalize delete routes, video+music routes
 # TODO: Make sessions expire after 1 hour or so
+
+
+def get_db():
+    db = getattr(flask.g, '_database', None)
+    if db is None:
+        db = flask.g._database = sqlite3.connect(DATABASE)
+    return db
+
 
 # check if user logged in
 def is_logged_in(f):
@@ -49,25 +54,26 @@ def is_logged_in(f):
 @app.route('/')
 @app.route('/music')
 def music():
-    cur = mysql.connection.cursor()
-    size = cur.execute('SELECT * FROM music')
+    cur = get_db().cursor()
+    cur.execute('SELECT * FROM music')
     data = cur.fetchall()
+    size = data.__sizeof__() # TODO: doesn't actually get size
     return render_template('music.html', music_players=data, size=size)
 
 
 @app.route('/deleteMusic/<music_id>')
 @is_logged_in
 def delete_music(music_id):
-    cur = mysql.connection.cursor()
+    cur = get_db().cursor()
     cur.execute('DELETE FROM music WHERE id = %s', music_id)
-    mysql.connection.commit()
+    # TODO: commit
     return redirect('/music')
 
 
 @app.route('/deleteMusic')
 @is_logged_in
 def delete_mus():
-    cur = mysql.connection.cursor()
+    cur = get_db().cursor()
     cur.execute('SELECT * FROM music')
     data = cur.fetchall()
     return render_template('deleteMusic.html', music=data)
@@ -94,17 +100,17 @@ def addMusic():
         ))
 
         # Create Cursor
-        cur = mysql.connection.cursor()
+        cur = get_db().cursor()
 
         # Insert new user
         cur.execute('INSERT INTO music(name, iframe, image) VALUES(%s, %s, %s)',
                     (name, iframe, image))
 
-        # Commit to DB
-        mysql.connection.commit()
+        # TODO: Commit to DB
+        #mysql.connection.commit()
 
-        # Close connection
-        mysql.connection.close()
+        # TODO: Close connection
+        # mysql.connection.close()
 
         return redirect('/')
     return render_template('addMusic.html', form=form)
@@ -112,17 +118,18 @@ def addMusic():
 
 @app.route('/video')
 def video():
-    cur = mysql.connection.cursor()
-
-    size = cur.execute('SELECT * FROM videos')
+    cur = get_db().cursor()
+    cur.execute('SELECT * FROM videos')
     videos = cur.fetchall()
+
+    size = videos.__sizeof__()
     return render_template('video.html', videos=videos, size=size)
 
 
 @app.route('/deleteVideo')
 @is_logged_in
 def delete_vid():
-    cur = mysql.connection.cursor()
+    cur = get_db().cursor()
     cur.execute('SELECT * FROM videos')
     data = cur.fetchall()
     return render_template('deleteVideo.html', videos=data)
@@ -131,9 +138,10 @@ def delete_vid():
 @app.route('/deleteVideo/<vid_id>')
 @is_logged_in
 def delete_video(vid_id):
-    cur = mysql.connection.cursor()
+    cur = get_db().cursor()
     cur.execute('DELETE FROM videos WHERE id = %s', vid_id)
-    mysql.connection.commit()
+    # TODO: commit
+    #mysql.connection.commit()
     return redirect('/video')
 
 
@@ -151,16 +159,16 @@ def add_video():
         url = form.url.data
 
         # Create Cursor
-        cur = mysql.connection.cursor()
+        cur = get_db().cursor()
 
         # Insert new user
         cur.execute('INSERT INTO videos(name, url) VALUES(%s, %s)', (name, url))
 
-        # Commit to DB
-        mysql.connection.commit()
+        #TODO: Commit to DB
+        # mysql.connection.commit()
 
-        # Close connection
-        mysql.connection.close()
+        #TODO: Close connection
+        # mysql.connection.close()
 
         return redirect('/video')
     return render_template('addVideo.html', form=form)
@@ -168,17 +176,19 @@ def add_video():
 
 @app.route('/gigs')
 def gigs():
-    cur = mysql.connection.cursor()
+    # TODO: Fix the hell out of this
+    cur = get_db().cursor()
+    cur.execute('SELECT * FROM gigs')
+    future_gigs = cur.fetchall()
 
-    future_gigs = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE()')
-    future_gigs_data = sorted(cur.fetchall(), key=lambda k: k['date'])
+    # future_gigs_data = sorted(cur.fetchall(), key=lambda k: k['date'])
 
-    past_gigs = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE() - INTERVAL 1 WEEK AND DATE < CURDATE()')
-    past_gigs_data = sorted(cur.fetchall(), key=lambda k: k['date'])
+    # past_gigs = cur.execute('SELECT * FROM gigs WHERE DATE >= date("now") - INTERVAL 1 WEEK AND DATE < date("now")')
+    # past_gigs_data = sorted(cur.fetchall(), key=lambda k: k['date'])
 
-    gigs_num = future_gigs + past_gigs
+    # gigs_num = future_gigs + past_gigs # TODO: check this
 
-    return render_template('gigs.html', gigs=future_gigs_data, old_gigs=past_gigs_data, gigs_num=gigs_num)
+    return render_template('gigs.html', gigs=future_gigs, old_gigs=None)
     # TODO: Work out what to do if no gigs
     # Close connection
 
@@ -186,7 +196,7 @@ def gigs():
 @app.route('/deleteGigs')
 @is_logged_in
 def delete_gigs():
-    cur = mysql.connection.cursor()
+    cur = get_db().cursor()
 
     result = cur.execute('SELECT * FROM gigs WHERE DATE >= CURDATE() - INTERVAL 1 WEEK')
 
@@ -203,9 +213,11 @@ def delete_gigs():
 @is_logged_in
 def delete_gig(gig_id):
     print(gig_id)
-    cur = mysql.connection.cursor()
+    cur = get_db().cursor()
     cur.execute("DELETE FROM gigs WHERE id = %s", [gig_id])
-    mysql.connection.commit()
+
+    # TODO: commit
+    # mysql.connection.commit()
     return redirect('/gigs')
 
 
@@ -235,10 +247,12 @@ def add_photo():
             app.instance_path, 'static/images/gallery', filename
         ))
 
-        cur = mysql.connection.cursor()
+        cur = get_db().cursor()
         cur.execute('INSERT INTO photos(path) VALUES(%s)', filename)
-        mysql.connection.commit()
-        mysql.connection.close()
+
+        #TODO: clost + commit
+        #mysql.connection.commit()
+        #mysql.connection.close()
 
         return redirect('photos.html')
     return render_template('addPhoto.html', form=form)
@@ -264,7 +278,7 @@ def add_gig():
         link = form.link.data
 
         # Create Cursor
-        cur = mysql.connection.cursor()
+        cur = get_db().cursor()
 
         # Insert new user
         cur.execute('INSERT INTO gigs(title, location, date, price, link) VALUES(%s, %s, %s, %s, %s)',
