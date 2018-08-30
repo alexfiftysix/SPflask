@@ -4,18 +4,15 @@ import sqlite3
 import flask
 from flask import Flask, render_template, flash, redirect, url_for, session, logging, request, jsonify
 from data import gigs_list, contact_list
-from flask_mysqldb import MySQL
 from wtforms import Form, StringField, DecimalField, TextAreaField, PasswordField, validators, DateTimeField
 from wtforms.fields.html5 import DateField
 
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from werkzeug.utils import secure_filename
-import flask_wtf
 
 from passlib.hash import sha256_crypt
 from functools import wraps
-import datetime
 
 app = Flask(__name__)
 app.secret_key = 'secret123'
@@ -305,7 +302,7 @@ class NewUserForm(Form):
 
 
 @app.route('/addUser', methods=['GET', 'POST'])
-@is_logged_in
+# @is_logged_in
 def add_user():
     form = NewUserForm(request.form)
     if request.method == 'POST' and form.validate():
@@ -313,16 +310,18 @@ def add_user():
         password = sha256_crypt.encrypt(str(form.password.data))
 
         # Create Cursor
-        cur = mysql.connection.cursor()
+        cur = get_db().cursor()
+
+        query = "INSERT INTO users VALUES('%s', '%s')" % (username, password)
 
         # Insert new user
-        cur.execute('INSERT INTO users(username, password) VALUES(%s, %s)', (username, password))
+        cur.execute(query)
 
         # Commit to DB
-        mysql.connection.commit()
-
+        # mysql.connection.commit()
         # Close connection
-        mysql.connection.close()
+        # mysql.connection.close()
+        cur.close()
 
         flash('You are now registered and can log in', 'success')
 
@@ -339,7 +338,7 @@ def login():
         username = request.form['username']
         password_candidate = request.form['password']
 
-        cur = mysql.connection.cursor()
+        cur = get_db().cursor()
         result = cur.execute('SELECT * FROM users WHERE username = %s', [username])
 
         if result > 0:
